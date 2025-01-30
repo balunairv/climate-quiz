@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climate Literacy Quiz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { background-color: #e0f7fa; text-align: center; font-family: Arial, sans-serif; }
+        .quiz-container { max-width: 600px; margin: 50px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
+        .progress { height: 20px; }
+        .hidden { display: none; }
+        .message { font-size: 1.5rem; padding: 10px; border-radius: 5px; margin-top: 20px; }
+        .green { background-color: #d4edda; color: #155724; }
+        .yellow { background-color: #fff3cd; color: #856404; }
+        .red { background-color: #f8d7da; color: #721c24; }
+        .selected { background-color: #90ee90 !important; }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h2>Climate Literacy Quiz</h2>
+        <div class="progress mb-3">
+            <div id="progress-bar" class="progress-bar" style="width: 0%;"></div>
+        </div>
+        <div id="quiz"></div>
+        <button id="next" class="btn btn-primary mt-3">Next</button>
+        <div id="result" class="hidden mt-4"></div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "What is the main cause of global warming?", options: ["Deforestation", "Burning fossil fuels", "Plastic waste", "Overfishing"], a: "Burning fossil fuels", exp: "Burning fossil fuels releases CO2, trapping heat in the atmosphere." },
+            { q: "What gas do trees absorb?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], a: "Carbon Dioxide", exp: "Trees absorb CO2 and help combat climate change." },
+            { q: "Which renewable energy source is derived from the sun?", options: ["Wind", "Solar", "Hydro", "Geothermal"], a: "Solar", exp: "Solar energy comes from sunlight and is a clean energy source." },
+            { q: "Which practice helps reduce waste?", options: ["Burning trash", "Recycling", "Using plastic bags", "Littering"], a: "Recycling", exp: "Recycling helps reduce waste and pollution." },
+            { q: "What can individuals do to save water?", options: ["Leave taps running", "Fix leaks", "Water lawns daily", "Ignore dripping faucets"], a: "Fix leaks", exp: "Fixing leaks saves water and reduces wastage." },
+            { q: "Which gas is the main contributor to the greenhouse effect?", options: ["Methane", "Oxygen", "Carbon Dioxide", "Nitrogen"], a: "Carbon Dioxide", exp: "CO2 is a major greenhouse gas that traps heat in the atmosphere." },
+            { q: "Which of these materials is biodegradable?", options: ["Plastic", "Glass", "Paper", "Metal"], a: "Paper", exp: "Paper decomposes naturally, unlike plastic or metal." },
+            { q: "What is an eco-friendly alternative to plastic bags?", options: ["Paper bags", "Styrofoam", "Plastic straws", "None"], a: "Paper bags", exp: "Paper bags are biodegradable and reduce plastic pollution." },
+            { q: "Which action reduces carbon footprint?", options: ["Using more cars", "Eating less meat", "Burning more coal", "Wasting food"], a: "Eating less meat", exp: "Eating less meat reduces carbon emissions from livestock farming." },
+            { q: "What happens when the ice caps melt?", options: ["Sea levels rise", "Earth gets colder", "More land appears", "More animals thrive"], a: "Sea levels rise", exp: "Melting ice caps contribute to rising sea levels and climate change." }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answers = [];
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            let optionsHtml = q.options.map(opt => `<button class='btn btn-light d-block w-100 my-1 option' onclick='selectAnswer(this, "${opt}")'>${opt}</button>`).join('');
+            $("#quiz").html(`<h4>${q.q}</h4>${optionsHtml}`);
+            $("#progress-bar").css("width", ((currentQuestion + 1) / questions.length * 100) + "%");
+        }
+
+        function selectAnswer(element, answer) {
+            $(".option").removeClass("selected");
+            $(element).addClass("selected");
+            const correct = answer === questions[currentQuestion].a;
+            if (correct) score++;
+            answers[currentQuestion] = { question: questions[currentQuestion].q, chosen: answer, correct, explanation: questions[currentQuestion].exp };
+            $("#next").show();
+        }
+
+        $("#next").click(() => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+                $("#next").hide();
+            } else {
+                showResults();
+            }
+        });
+
+        function showResults() {
+            let messageClass, messageText;
+            if (score >= 7) {
+                messageClass = "green";
+                messageText = "🎉 Amazing! You are a climate hero! Keep protecting the Earth! 🌍";
+            } else if (score >= 4) {
+                messageClass = "yellow";
+                messageText = "🌱 Good effort! But there's room to improve. Keep learning! 📚";
+            } else {
+                messageClass = "red";
+                messageText = "🚨 Oh no! You need to learn more about saving the planet! 🌿";
+            }
+
+            let resultHtml = `<div class='message ${messageClass}'>${messageText}</div><ul class='list-group text-start'>`;
+            answers.forEach(a => {
+                resultHtml += `<li class='list-group-item'>
+                                <strong>Q:</strong> ${a.question}<br>
+                                <strong>Your Answer:</strong> ${a.chosen} ${a.correct ? "✅" : "❌"}<br>
+                                ${!a.correct ? `<strong>Correct Answer:</strong> ${questions.find(q => q.q === a.question).a}<br>` : ""}
+                                <small>${a.explanation}</small>
+                              </li>`;
+            });
+            resultHtml += "</ul><button onclick='restartQuiz()' class='btn btn-success mt-3'>Try Again</button>";
+            $("#quiz, #next").hide();
+            $("#result").html(resultHtml).removeClass("hidden");
+        }
+
+        $(document).ready(() => { loadQuestion(); $("#next").hide(); });
+    </script>
+</body>
+</html>
